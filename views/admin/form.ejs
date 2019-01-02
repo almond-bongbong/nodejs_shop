@@ -1,0 +1,21 @@
+<% include ../header.ejs %>
+
+<form action="" method="post">
+    <table class="table table-bordered">
+        <tr>
+            <th><label for="p_name">제품명</label></th>
+            <td><input type="text" id="p_name" name="name" class="form-control" value="<%=product.name%>"/></td>
+        </tr>
+        <tr>
+            <th><label for="p_price">가격</label></th>
+            <td><input type="text" id="p_price" name="price" class="form-control" value="<%=product.price%>"/></td>
+        </tr>
+        <tr>
+            <th><label for="p_description">설명</label></th>
+            <td><input type="text" id="p_description" name="description" class="form-control" value="<%=product.description%>"/></td>
+        </tr>
+    </table>
+    <button class="btn btn-primary">작성하기</button>
+</form>
+
+<% include ../footer.ejs %>

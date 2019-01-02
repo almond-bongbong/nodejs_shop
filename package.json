@@ -1,0 +1,21 @@
+{
+  "name": "nodejs_shop",
+  "version": "1.0.0",
+  "description": "쇼핑몰",
+  "main": "app.js",
+  "scripts": {
+    "start": "npx nodemon ./app.js",
+    "build": "npx nodemon ./app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "cmlee",
+  "license": "ISC",
+  "dependencies": {
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "mongodb": "^3.1.10",
+    "mongoose": "^4.11.2",
+    "mongoose-plugin-autoinc": "^1.1.9",
+    "morgan": "^1.9.1"
+  }
+}
