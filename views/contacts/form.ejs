@@ -1,0 +1,29 @@
+<% include ../header.ejs %>
+
+<form action="" method="post">
+    <table class="table table-bordered">
+        <tr>
+            <th>
+                <label for="name">이름</label></th>
+            <td>
+                <input type="text" id="name" name="name" class="form-control"/>
+            </td>
+        </tr>
+        <tr>
+            <th>
+                <label for="title">제목</label></th>
+            <td>
+                <input type="text" id="title" name="title" class="form-control"/>
+            </td>
+        </tr>
+        <tr>
+            <th>
+                <label for="article">내용</label>
+            </th>
+            <td><textarea id="article" name="article" class="form-control"></textarea></td>
+        </tr>
+    </table>
+    <button class="btn btn-primary">작성하기</button>
+</form>
+
+<% include ../footer.ejs %>

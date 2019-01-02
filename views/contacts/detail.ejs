@@ -1,0 +1,32 @@
+<% include ../header.ejs %>
+
+<form action="" method="post">
+    <table class="table table-bordered">
+        <tr>
+            <th>
+                <label for="name">이름</label></th>
+            <td>
+                <%= contact.name %>
+            </td>
+        </tr>
+        <tr>
+            <th>
+                <label for="title">제목</label></th>
+            </th>
+            <td>
+                <%= contact.title %>
+            </td>
+        </tr>
+        <tr>
+            <th>
+                <label for="article">내용</label>
+            </th>
+            <td>
+                <%= contact.article %>
+            </td>
+        </tr>
+    </table>
+    <button class="btn btn-primary">작성하기</button>
+</form>
+
+<% include ../footer.ejs %>
