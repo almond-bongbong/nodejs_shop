@@ -11,6 +11,8 @@
   "author": "cmlee",
   "license": "ISC",
   "dependencies": {
+    "cookie-parser": "^1.4.3",
+    "csurf": "^1.9.0",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
     "mongodb": "^3.1.10",

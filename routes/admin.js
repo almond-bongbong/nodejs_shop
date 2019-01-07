@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const ProductsModel = require('../models/ProductsModel');
+const CommentsModel = require('../models/CommentsModel');
 
 router.get('/', (req, res) => {
   res.send('hello admin');
@@ -22,30 +23,26 @@ router.post('/products/write', (req, res) => {
     price : req.body.price,
     description : req.body.description,
   });
-  product.save(err => {
-    if (err) {
-      res.send(`
-            <script type="text/javascript">
-                alert('${err.message}');
-                location.href='/admin/products/write';
-            </script>
-      `);
-    } else {
+
+  if (!product.validateSync()) {
+    product.save(err => {
       res.redirect('/admin/products');
-    }
-  });
+    });
+  }
 });
 
 router.get('/products/detail/:id', (req, res) => {
   const id = req.params.id;
-  ProductsModel.findOne({id: id}, (err, product) => {
-    res.render('admin/detail', { product: product });
+  ProductsModel.findOne({id}, (err, product) => {
+    CommentsModel.find({ product_id : id } , (err, comments) => {
+      res.render('admin/productsDetail', { product, comments });
+    });
   });
 });
 
 router.get('/products/edit/:id', (req, res) => {
   const id = req.params.id;
-  ProductsModel.findOne({id: id}, (err, product) => {
+  ProductsModel.findOne({id}, (err, product) => {
     res.render('admin/form', { product: product });
   });
 });
@@ -60,10 +57,40 @@ router.post('/products/edit/:id', (req, res) => {
     description : req.body.description,
   };
 
-  //update의 첫번째 인자는 조건, 두번째 인자는 바뀔 값들
-  ProductsModel.update({ id : id }, { $set : query }, (err) => {
-    //수정후 본래보던 상세페이지로 이동
-    res.redirect(`/admin/products/detail/${id}`);
+  const product = new ProductsModel(query);
+  if (!product.validateSync()) {
+    //update의 첫번째 인자는 조건, 두번째 인자는 바뀔 값들
+    ProductsModel.update({id}, { $set: query }, (err) => {
+      //수정후 본래보던 상세페이지로 이동
+      res.redirect(`/admin/products/detail/${id}`);
+    });
+  }
+});
+
+router.get('/products/delete/:id', (req, res) => {
+  const id = req.params.id;
+  ProductsModel.remove({id}, (err) => {
+    res.redirect('/admin/products');
+  });
+});
+
+router.post('/products/ajax_comment/insert', (req, res) => {
+  const comment = new CommentsModel({
+    content : req.body.content,
+    product_id : parseInt(req.body.product_id, 10),
+  });
+  comment.save((err, comment) => {
+    res.json({
+      id : comment.id,
+      content : comment.content,
+      message : "success"
+    });
+  });
+});
+
+router.post('/products/ajax_comment/delete', (req, res) => {
+  CommentsModel.remove({ id : req.body.comment_id } , (err) => {
+    res.json({ message : "success" });
   });
 });
 
