@@ -2,6 +2,24 @@ const express = require('express');
 const router = express.Router();
 const ProductsModel = require('../models/ProductsModel');
 const CommentsModel = require('../models/CommentsModel');
+const csrf = require('csurf');
+const csrfProtection = csrf({ cookie: true });
+const path = require('path');
+const uploadDir = path.join( __dirname , '../uploads' ); // 루트의 uploads위치에 저장한다.
+const fs = require('fs');
+const loginRequired = require('../libs/loginRequired');
+
+//multer 셋팅
+const multer  = require('multer');
+const storage = multer.diskStorage({
+  destination : (req, file, callback) => { //이미지가 저장되는 도착지 지정
+    callback(null, uploadDir );
+  },
+  filename : (req, file, callback) => { // products-날짜.jpg(png) 저장
+    callback(null, 'products-' + Date.now() + '.'+ file.mimetype.split('/')[1] );
+  }
+});
+const upload = multer({ storage: storage });
 
 router.get('/', (req, res) => {
   res.send('hello admin');
@@ -13,21 +31,26 @@ router.get('/products', (req, res) => {
   });
 });
 
-router.get('/products/write', (req, res) => {
-  res.render('admin/form', {product: {}});
+router.get('/products/write', loginRequired, csrfProtection, (req, res) => {
+  res.render('admin/form', { product: '', csrfToken: req.csrfToken()});
 });
 
-router.post('/products/write', (req, res) => {
+router.post('/products/write', loginRequired, upload.single('thumbnail'), csrfProtection, (req, res) => {
+
   const product = new ProductsModel({
     name : req.body.name,
     price : req.body.price,
+    thumbnail: req.file ? req.file.filename : '',
     description : req.body.description,
+    username: req.user.username,
   });
 
   if (!product.validateSync()) {
     product.save(err => {
       res.redirect('/admin/products');
     });
+  } else {
+    res.send('error');
   }
 });
 
@@ -40,31 +63,41 @@ router.get('/products/detail/:id', (req, res) => {
   });
 });
 
-router.get('/products/edit/:id', (req, res) => {
+router.get('/products/edit/:id', csrfProtection, (req, res) => {
   const id = req.params.id;
   ProductsModel.findOne({id}, (err, product) => {
-    res.render('admin/form', { product: product });
+    res.render('admin/form', { product: product, csrfToken: req.csrfToken() });
   });
 });
 
-router.post('/products/edit/:id', (req, res) => {
+router.post('/products/edit/:id', upload.single('thumbnail'), csrfProtection, (req, res) => {
   const id = req.params.id;
 
-  //넣을 변수 값을 셋팅한다
-  const query = {
-    name : req.body.name,
-    price : req.body.price,
-    description : req.body.description,
-  };
+  ProductsModel.findOne( {id : req.params.id}, (err, product) => {
+    if (req.file && product.thumbnail) { //요청중에 파일이 존재 할시 이전이미지 지운다.
+      // 동기 방식
+      fs.unlinkSync(uploadDir + '/' + product.thumbnail);
+    }
 
-  const product = new ProductsModel(query);
-  if (!product.validateSync()) {
-    //update의 첫번째 인자는 조건, 두번째 인자는 바뀔 값들
-    ProductsModel.update({id}, { $set: query }, (err) => {
-      //수정후 본래보던 상세페이지로 이동
-      res.redirect(`/admin/products/detail/${id}`);
-    });
-  }
+    //넣을 변수 값을 셋팅한다
+    const query = {
+      name : req.body.name,
+      price : req.body.price,
+      thumbnail: req.file ? req.file.filename : product.thumbnail,
+      description : req.body.description,
+    };
+
+    const productm = new ProductsModel(query);
+    if (!productm.validateSync()) {
+      //update의 첫번째 인자는 조건, 두번째 인자는 바뀔 값들
+      ProductsModel.update({id}, { $set: query }, (err) => {
+        //수정후 본래보던 상세페이지로 이동
+        res.redirect(`/admin/products/detail/${id}`);
+      });
+    } else {
+      res.send('error');
+    }
+  });
 });
 
 router.get('/products/delete/:id', (req, res) => {

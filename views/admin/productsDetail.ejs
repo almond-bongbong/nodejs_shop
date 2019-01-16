@@ -8,6 +8,13 @@
         <div style="padding-bottom: 10px">
             작성일 : <%= product.getDate.year %>.<%= product.getDate.month %>.<%= product.getDate.day %>
         </div>
+
+        <% if (product.thumbnail) {%>
+            <p>
+                <img src="/uploads/<%= product.thumbnail %>" style="max-width: 100%" alt="">
+            </p>
+        <% } %>
+
         <%= product.description %>
 
         <!-- 댓글영역  -->

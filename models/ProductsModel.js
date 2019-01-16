@@ -9,10 +9,12 @@ const ProductsSchema = new Schema({
   },
   price: Number,
   description: String,
+  thumbnail : String, //이미지 파일명
   created_at: {
     type: Date,
     default: Date.now(),
-  }
+  },
+  username : String  //작성자추가
 });
 
 ProductsSchema.virtual('getDate').get(function(){
