@@ -8,6 +8,7 @@ const path = require('path');
 const uploadDir = path.join( __dirname , '../uploads' ); // 루트의 uploads위치에 저장한다.
 const fs = require('fs');
 const loginRequired = require('../libs/loginRequired');
+const paginate = require('express-paginate');
 
 //multer 셋팅
 const multer  = require('multer');
@@ -25,9 +26,18 @@ router.get('/', (req, res) => {
   res.send('hello admin');
 });
 
-router.get('/products', (req, res) => {
-  ProductsModel.find((err, products) => {
-    res.render('admin/products', { products: products });
+router.get('/products', paginate.middleware(10, 50), async (req, res) => {
+  const [ results, itemCount ] = await Promise.all([
+    ProductsModel.find().sort('-created_at, -id').limit(req.query.limit).skip(req.skip),
+    ProductsModel.count(),
+  ]);
+  const pageCount = Math.ceil(itemCount / req.query.limit);
+  const pages = paginate.getArrayPages(req)(5, pageCount, req.query.page);
+
+  res.render('admin/products', {
+    products: results,
+    pages: pages,
+    pageCount: pageCount,
   });
 });
 
@@ -36,7 +46,6 @@ router.get('/products/write', loginRequired, csrfProtection, (req, res) => {
 });
 
 router.post('/products/write', loginRequired, upload.single('thumbnail'), csrfProtection, (req, res) => {
-
   const product = new ProductsModel({
     name : req.body.name,
     price : req.body.price,
@@ -54,13 +63,13 @@ router.post('/products/write', loginRequired, upload.single('thumbnail'), csrfPr
   }
 });
 
-router.get('/products/detail/:id', (req, res) => {
+router.get('/products/detail/:id', async (req, res) => {
   const id = req.params.id;
-  ProductsModel.findOne({id}, (err, product) => {
-    CommentsModel.find({ product_id : id } , (err, comments) => {
-      res.render('admin/productsDetail', { product, comments });
-    });
-  });
+  const [product, comments] = await Promise.all([
+    ProductsModel.findOne({id}),
+    CommentsModel.find({ product_id : id }),
+  ]);
+  res.render('admin/productsDetail', { product, comments });
 });
 
 router.get('/products/edit/:id', csrfProtection, (req, res) => {
@@ -125,6 +134,10 @@ router.post('/products/ajax_comment/delete', (req, res) => {
   CommentsModel.remove({ id : req.body.comment_id } , (err) => {
     res.json({ message : "success" });
   });
+});
+
+router.post('/products/ajax_summernote', loginRequired, upload.array('thumbnail', 10), (req, res) => {
+  res.send(req.files.map(file => `/uploads/${file.filename}`));
 });
 
 module.exports = router;

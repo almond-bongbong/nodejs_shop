@@ -10,12 +10,14 @@
         </div>
 
         <% if (product.thumbnail) {%>
+            thumbnail :
             <p>
                 <img src="/uploads/<%= product.thumbnail %>" style="max-width: 100%" alt="">
             </p>
+            <hr />
         <% } %>
 
-        <%= product.description %>
+        <%- product.description %>
 
         <!-- 댓글영역  -->
         <hr/>

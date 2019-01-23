@@ -16,7 +16,7 @@ passport.use(new FacebookStrategy({
   clientID: '138872103698436',
   clientSecret: '94ebe7c2fefc7d9b4de16661a984780c',
   callbackURL: 'https://localhost:3000/auth/facebook/callback',
-  profileFields: ['id', 'displayName', 'photos', 'email'],
+  profileFields: ['id', 'displayname', 'photos', 'email'],
 }, (accessToken, refreshToken, profile, done) => {
   console.log('access token : ', accessToken);
   console.log('refresh token : ', refreshToken);
@@ -27,7 +27,7 @@ passport.use(new FacebookStrategy({
       const regData = {
         username: 'fb_' + profile.id,
         password: 'facebook_login',
-        displayname: profile.displayName,
+        displayname: profile.displayname,
       };
       const User = new UserModel(regData);
       User.save((err) => {

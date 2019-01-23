@@ -21,12 +21,11 @@ passport.use(new LocalStrategy({
 
 passport.serializeUser((user, done) => {
   console.log('serializeUser');
-  done(null, { id: user.id });
+  done(null, user);
 });
 
 passport.deserializeUser((user, done) => {
   console.log('deserializeUser');
-
   UserModel.findOne({ id: user.id }, (error, result) => {
     result.password = '';
     done(null, result);
@@ -40,13 +39,16 @@ router.get('/', (req, res) => {
 router.get('/user', (req, res) => {
   const { username } = req.query;
   UserModel.findOne({username}, (err, user) => {
-
-    res.json({
-      id: user.id,
-      username: user.username,
-      displayname: user.displayname,
-      created_at: user.created_at,
-    });
+    if (user) {
+      res.json({
+        id: user.id,
+        username: user.username,
+        displayname: user.displayname,
+        created_at: user.created_at,
+      });
+    } else {
+      res.json(null);
+    }
   });
 });
 
