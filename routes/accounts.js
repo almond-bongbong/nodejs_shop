@@ -20,14 +20,13 @@ passport.use(new LocalStrategy({
 }));
 
 passport.serializeUser((user, done) => {
-  console.log('serializeUser');
   done(null, user);
 });
 
 passport.deserializeUser((user, done) => {
-  console.log('deserializeUser');
   UserModel.findOne({ id: user.id }, (error, result) => {
-    result.password = '';
+    console.log('result : ', result);
+    if (result) result.password = '';
     done(null, result);
   });
 });

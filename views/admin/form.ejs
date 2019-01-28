@@ -1,35 +1,37 @@
 <% include ../header.ejs %>
 
-<form action="" id="p_form" method="post" enctype="multipart/form-data">
-    <input type="hidden" name="_csrf" value="<%=csrfToken%>" />
-    <table class="table table-bordered">
-        <tr>
-            <th><label for="p_name">제품명</label></th>
-            <td><input type="text" id="p_name" name="name" class="form-control" value="<%=product.name%>"/></td>
-        </tr>
-        <tr>
-            <th>섬네일</th>
-            <td>
-                <input type="file" name="thumbnail" />
-                <% if(product.thumbnail){ %>
-                <a href="/uploads/<%=product.thumbnail%>" target="_blank">업로드 이미지 보기</a>
-                <% } %>
-            </td>
-        </tr>
-        <tr>
-            <th><label for="p_price">가격</label></th>
-            <td><input type="text" id="p_price" name="price" class="form-control" value="<%=product.price%>"/></td>
-        </tr>
-        <tr>
-            <th><label for="p_description">설명</label></th>
-            <td>
-                <textarea name="description" class="form-control" id="p_description"><%-product.description%></textarea>
-            </td>
-        </tr>
-    </table>
-    <button class="btn btn-primary">작성하기</button>
-</form>
-
+<% include ./sidebar.ejs %>
+<div class="col-sm-10">
+    <form action="" id="p_form" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf" value="<%=csrfToken%>" />
+        <table class="table table-bordered">
+            <tr>
+                <th><label for="p_name">제품명</label></th>
+                <td><input type="text" id="p_name" name="name" class="form-control" value="<%=product.name%>"/></td>
+            </tr>
+            <tr>
+                <th>섬네일</th>
+                <td>
+                    <input type="file" name="thumbnail" />
+                    <% if(product.thumbnail){ %>
+                    <a href="/uploads/<%=product.thumbnail%>" target="_blank">업로드 이미지 보기</a>
+                    <% } %>
+                </td>
+            </tr>
+            <tr>
+                <th><label for="p_price">가격</label></th>
+                <td><input type="text" id="p_price" name="price" class="form-control" value="<%=product.price%>"/></td>
+            </tr>
+            <tr>
+                <th><label for="p_description">설명</label></th>
+                <td>
+                    <textarea name="description" class="form-control" id="p_description"><%-product.description%></textarea>
+                </td>
+            </tr>
+        </table>
+        <button class="btn btn-primary">작성하기</button>
+    </form>
+</div>
 <script>
   $(document).ready(function(){
     $('#p_form').submit(function() {

@@ -2,12 +2,12 @@ const express = require('express');
 const router = express.Router();
 const ProductsModel = require('../models/ProductsModel');
 const CommentsModel = require('../models/CommentsModel');
+const CheckoutModel = require('../models/CheckoutModel');
 const csrf = require('csurf');
 const csrfProtection = csrf({ cookie: true });
 const path = require('path');
 const uploadDir = path.join( __dirname , '../uploads' ); // 루트의 uploads위치에 저장한다.
 const fs = require('fs');
-const loginRequired = require('../libs/loginRequired');
 const paginate = require('express-paginate');
 
 //multer 셋팅
@@ -41,11 +41,11 @@ router.get('/products', paginate.middleware(10, 50), async (req, res) => {
   });
 });
 
-router.get('/products/write', loginRequired, csrfProtection, (req, res) => {
+router.get('/products/write', csrfProtection, (req, res) => {
   res.render('admin/form', { product: '', csrfToken: req.csrfToken()});
 });
 
-router.post('/products/write', loginRequired, upload.single('thumbnail'), csrfProtection, (req, res) => {
+router.post('/products/write', upload.single('thumbnail'), csrfProtection, (req, res) => {
   const product = new ProductsModel({
     name : req.body.name,
     price : req.body.price,
@@ -136,8 +136,24 @@ router.post('/products/ajax_comment/delete', (req, res) => {
   });
 });
 
-router.post('/products/ajax_summernote', loginRequired, upload.array('thumbnail', 10), (req, res) => {
+router.post('/products/ajax_summernote', upload.array('thumbnail', 10), (req, res) => {
   res.send(req.files.map(file => `/uploads/${file.filename}`));
+});
+
+router.get('/order', (req, res) => {
+  CheckoutModel.find((err, orderList) => {
+    res.render( 'admin/orderList' ,
+      { orderList : orderList }
+    );
+  });
+});
+
+router.get('/order/edit/:id', (req, res) => {
+  CheckoutModel.findOne( { id : req.params.id } , (err, order) => {
+    res.render( 'admin/orderForm' ,
+      { order }
+    );
+  });
 });
 
 module.exports = router;

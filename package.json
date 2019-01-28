@@ -4,8 +4,8 @@
   "description": "쇼핑몰",
   "main": "app.js",
   "scripts": {
-    "start": "npx nodemon ./app.js",
-    "build": "npx nodemon ./app.js",
+    "start": "nodemon ./app.js",
+    "build": "nodemon ./app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "cmlee",
@@ -21,6 +21,7 @@
     "express": "^4.16.4",
     "express-paginate": "^1.0.0",
     "express-session": "^1.15.6",
+    "iamporter": "^1.4.2",
     "mongodb": "^3.1.10",
     "mongoose": "4.11.2",
     "mongoose-plugin-autoinc": "^1.1.9",

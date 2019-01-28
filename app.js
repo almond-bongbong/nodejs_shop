@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const adminRequired = require('./libs/adminRequired');
 const home = require('./routes/home');
 const admin = require('./routes/admin');
 const contacts = require('./routes/contacts');
@@ -7,6 +8,8 @@ const accounts = require('./routes/accounts');
 const auth = require('./routes/auth');
 const chat = require('./routes/chat');
 const products = require('./routes/products');
+const cart = require('./routes/cart');
+const checkout = require('./routes/checkout');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
@@ -39,6 +42,8 @@ app.use(cookieParser());
 
 //업로드 path 추가, 정적 파일 제공
 app.use('/uploads', express.static('uploads'));
+//static path 추가
+app.use('/static', express.static('static'));
 
 const connectMongo = require('connect-mongo');
 const MongoStore = connectMongo(session);
@@ -66,12 +71,14 @@ app.use((req, res, next) => {
 });
 
 app.use('/', home);
-app.use('/admin', admin);
+app.use('/admin', adminRequired, admin);
 app.use('/accounts', accounts);
 app.use('/contacts', contacts);
 app.use('/auth', auth);
 app.use('/chat', chat);
 app.use('/products', products);
+app.use('/cart', cart);
+app.use('/checkout', checkout);
 
 const server = app.listen( port, function() {
   console.log('Express listening on port', port);
