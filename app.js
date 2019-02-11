@@ -67,6 +67,7 @@ app.use(flash());
 
 app.use((req, res, next) => {
   app.locals.isLogin = req.isAuthenticated();
+  app.locals.userData = req.user; //사용 정보를 보내고 싶으면 이와같이 셋팅
   next();
 });
 

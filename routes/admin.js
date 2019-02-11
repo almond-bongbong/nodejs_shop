@@ -145,7 +145,7 @@ router.get('/order', (req, res) => {
     res.render( 'admin/orderList' ,
       { orderList : orderList }
     );
-  });
+  }).sort('-created_at');
 });
 
 router.get('/order/edit/:id', (req, res) => {
@@ -155,5 +155,52 @@ router.get('/order/edit/:id', (req, res) => {
     );
   });
 });
+
+router.post('/order/edit/:id', (req, res) => {
+  const query = {
+    status : req.body.status,
+    song_jang : req.body.song_jang
+  };
+
+  CheckoutModel.update({ id : req.params.id }, { $set : query }, (err) => {
+    res.redirect('/admin/order');
+  });
+});
+
+router.get('/statistics', async (req, res) => {
+
+  const barData = [];
+  const barCursor = CheckoutModel.aggregate([
+    {$sort: {created_at: -1}},
+    {$group: {
+      _id: {
+        year: {$year: '$created_at'},
+        month: {$month: '$created_at'},
+        day: {$dayOfMonth: '$created_at'},
+      },
+      count: {$sum: 1}
+    }}
+  ]).cursor({batchSize: 1000}).exec();
+
+  await barCursor.eachAsync((doc) => {
+    if (doc !== null) barData.push(doc);
+  });
+
+  const pieData = [];
+  const pieCursor = CheckoutModel.aggregate([
+    {$group: {
+      _id: "$status",
+      count: {$sum: 1}
+    }}
+  ]).cursor({batchSize: 1000}).exec();
+
+  await pieCursor.eachAsync((doc) => {
+    if (doc !== null) pieData.push(doc);
+  });
+
+  res.render('admin/statistics' , { barData : barData , pieData:pieData });
+});
+
+
 
 module.exports = router;

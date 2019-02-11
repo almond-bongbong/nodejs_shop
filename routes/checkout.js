@@ -6,6 +6,9 @@ const iamporter = new Iamporter({
   apiKey: '0765376472603732',
   secret: 'VqGF8yc8gTIABm0jAFnUoGaSIOWR5tm1U3G2BTaSMTsoftHQ85LwLWouKllQPIRKLyMmrXfeQIC6bjWk'
 });
+const request = require('request');
+const cheerio = require('cheerio');
+const removeEmpty = require('../libs/removeEmpty');
 
 router.get('/' , function(req, res){
 
@@ -95,6 +98,46 @@ router.post('/mobile_complete', (req,res)=>{
 
 router.get('/success', function(req,res){
   res.render('checkout/success');
+});
+
+router.get('/nomember', function(req,res){
+  res.render('checkout/nomember');
+});
+
+router.get('/nomember/search', function(req,res){
+  CheckoutModel.find({ buyer_email : req.query.email }, function(err, checkoutList){
+    res.render('checkout/search', { checkoutList : checkoutList } );
+  });
+});
+
+router.get('/shipping/:invc_no', (req, res) => {
+  const url = "https://www.doortodoor.co.kr/parcel/doortodoor.do?fsp_action=PARC_ACT_002&fsp_cmd=retrieveInvNoACT&invc_no=" + req.params.invc_no ;
+  const result = [];
+
+  request(url, (error, response, body) => {
+    const $ = cheerio.load(body, { decodeEntities: false });
+    const tdElements = $(".board_area").find("table.mb15 tbody tr td");
+
+    let temp = {};
+    for( let i = 0; i < tdElements.length; i++ ){
+      if(i % 4 === 0){
+        temp["step"] = removeEmpty(tdElements[i].children[0].data);
+      } else if (i % 4 === 1) {
+        temp["date"] = tdElements[i].children[0].data;
+      } else if (i % 4 === 2) {
+        temp["status"] = tdElements[i].children[0].data;
+        if (tdElements[i].children.length>1){
+          temp["status"] += tdElements[i].children[2].data;
+        }
+      } else if (i % 4 === 3){
+        temp["location"] = tdElements[i].children[1].children[0].data;
+        result.push(temp);
+        temp = {};
+      }
+    }
+
+    res.render( 'checkout/shipping' , { result : result }); //최종값 전달
+  });
 });
 
 module.exports = router;
